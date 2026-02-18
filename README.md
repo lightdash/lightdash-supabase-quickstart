@@ -2,6 +2,13 @@
 
 Get from zero to charts on your Supabase data in ~15 minutes. No dbt required.
 
+Start by cloning this repo — it's your playground:
+
+```bash
+git clone git@github.com:lightdash/lightdash-supabase-quickstart.git
+cd lightdash-supabase-quickstart
+```
+
 ---
 
 ## Step 1 — Sign up at app.lightdash.cloud
@@ -131,7 +138,7 @@ The agent will query your schema via the Supabase MCP (already configured in `.c
 
 ---
 
-### Lint and deploy
+### Deploy your project and connect your warehouse
 
 Always lint before deploying to catch any issues early:
 
@@ -140,9 +147,21 @@ lightdash lint
 lightdash deploy --create --no-warehouse-credentials
 ```
 
-Then go to **Lightdash → Project Settings** and enter your Supabase warehouse credentials (use the Shared Pooler host, port `6543`, and set SSL mode to `no-verify`).
+Then connect your warehouse — this script does it in one shot using the credentials from your `.env`:
+
+This script uses the API to set the warehouse credentials on your project — no UI step needed.
+
+```bash
+bash set-warehouse.sh
+```
 
 ---
+
+### You can now query your data in Lightdash
+
+Now that your warehouse is connected, you can start building charts and dashboards in Lightdash at https://app.lightdash.cloud/projects/YOUR-PROJECT-UUID/tables
+
+![Query your data](assets/9-there-are-tables.png)
 
 ### After any model changes
 
