@@ -55,6 +55,10 @@ Select the **"Using your CLI"** option — this is the fastest way to get set up
 
 Copy the two commands shown on screen — one to install the Lightdash CLI and one to log in with your auth token.
 
+> [!NOTE]
+> You can skip the "deploy" command, we will do that later
+
+> [!IMPORTANT]
 > 💡 **Keep that login command saved!** It contains your personal auth token. If you ever need to re-login (new machine, new terminal session), just run it again.
 
 ![Install CLI and copy login command](assets/6-install-lightdash-cli-and-copy-login-command.png)
@@ -63,14 +67,6 @@ Copy the two commands shown on screen — one to install the Lightdash CLI and o
 npm install -g @lightdash/cli
 lightdash login https://app.lightdash.cloud --token <your-token>
 ```
-
----
-
-## Step 7 — You're all set up!
-
-You should see a confirmation screen. Lightdash is ready and waiting for your models.
-
-![All set up](assets/7-all-set-up.png)
 
 ---
 
