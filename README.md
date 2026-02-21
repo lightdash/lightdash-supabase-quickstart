@@ -117,7 +117,11 @@ Just open the project in your editor and authenticate when prompted (it'll open 
 Run the setup script — it'll walk you through entering your Supabase credentials and test the connection:
 
 ```bash
+# macOS / Linux
 bash setup.sh
+
+# Windows (PowerShell)
+powershell -ExecutionPolicy Bypass -File ./setup.ps1
 ```
 
 You'll find your connection details under **Supabase → Connect → Session Pooler → View parameters**.
@@ -152,7 +156,11 @@ Then connect your warehouse — this script does it in one shot using the creden
 This script uses the API to set the warehouse credentials on your project — no UI step needed.
 
 ```bash
+# macOS / Linux
 bash set-warehouse.sh
+
+# Windows (PowerShell)
+powershell -ExecutionPolicy Bypass -File ./set-warehouse.ps1
 ```
 
 ---
