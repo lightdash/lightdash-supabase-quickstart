@@ -55,11 +55,19 @@ Write-Info "Reading active Lightdash project..."
 $PROJECT_UUID = $env:LIGHTDASH_PROJECT
 
 if ([string]::IsNullOrWhiteSpace($PROJECT_UUID) -and (Get-Command lightdash -ErrorAction SilentlyContinue)) {
+    Write-Host "  (auto-detecting from lightdash CLI, timeout 10s...)"
     try {
-        $projectOutput = & lightdash config get-project 2>$null
-        if ($projectOutput -match '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}') {
-            $PROJECT_UUID = $Matches[0]
+        $job = Start-Job -ScriptBlock { & lightdash config get-project 2>$null }
+        $finished = $job | Wait-Job -Timeout 10
+        if ($finished) {
+            $projectOutput = Receive-Job $job
+            if ($projectOutput -match '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}') {
+                $PROJECT_UUID = $Matches[0]
+            }
+        } else {
+            Write-Warn "lightdash CLI timed out - skipping auto-detect"
         }
+        Remove-Job $job -Force -ErrorAction SilentlyContinue
     } catch { }
 }
 
@@ -81,12 +89,18 @@ $LIGHTDASH_TOKEN = $env:LIGHTDASH_API_KEY
 
 # Try config.yaml (written by lightdash login)
 if ([string]::IsNullOrWhiteSpace($LIGHTDASH_TOKEN)) {
-    $cliCfg = Join-Path $HOME ".config\lightdash\config.yaml"
-    if (Test-Path $cliCfg) {
-        $yamlContent = Get-Content $cliCfg -Raw
-        if ($yamlContent -match '(?m)^\s*apiKey:\s*"?([^"\s]+)"?') {
-            $LIGHTDASH_TOKEN = $Matches[1]
-            Write-Success "Token found in $cliCfg"
+    $configCandidates = @(
+        (Join-Path $HOME ".config\lightdash\config.yaml"),
+        (Join-Path $env:APPDATA "lightdash\config.yaml")
+    )
+    foreach ($cliCfg in $configCandidates) {
+        if (Test-Path $cliCfg) {
+            $yamlContent = Get-Content $cliCfg -Raw
+            if ($yamlContent -match '(?m)^\s*apiKey:\s*"?([^"\s]+)"?') {
+                $LIGHTDASH_TOKEN = $Matches[1]
+                Write-Success "Token found in $cliCfg"
+                break
+            }
         }
     }
 }
@@ -113,6 +127,7 @@ if ([string]::IsNullOrWhiteSpace($LIGHTDASH_TOKEN)) {
     Write-Warn "No token found automatically."
     Write-Host "  Create one at: $LIGHTDASH_URL/settings/personal-access-tokens"
     Write-Host ""
+    Write-Host "  (input will be hidden)" -ForegroundColor DarkGray
     $tokenSecure = Read-Host "  Paste token" -AsSecureString
     $LIGHTDASH_TOKEN = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
         [Runtime.InteropServices.Marshal]::SecureStringToBSTR($tokenSecure)

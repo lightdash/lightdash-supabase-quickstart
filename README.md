@@ -97,14 +97,38 @@ lightdash install-skills --agent codex
 
 ### Prerequisite 3 — Connect the Supabase MCP
 
-The Supabase MCP lets your AI agent query your database schema directly — no copy-pasting required. It's already configured for both editors:
+The Supabase MCP lets your AI agent query your database schema directly — no copy-pasting required. The config file is already included in this repo for both editors:
 
 - **Cursor** — `.cursor/mcp.json` ✓
 - **Claude Code** — `.claude/mcp.json` ✓
 
-Just open the project in your editor and authenticate when prompted (it'll open a browser window to log in to your Supabase account). The agent will use it automatically when generating models.
+This works on **macOS, Linux, and Windows** — it's a remote HTTP connection, so there's nothing platform-specific to install.
 
-> Want to customise the setup — scope to a specific project, disable write access, or use a PAT for CI? See the [Supabase MCP docs](https://supabase.com/docs/guides/getting-started/mcp#remote-mcp-installation).
+#### Setup steps
+
+1. **Open this project in Cursor** (or Claude Code). The editor will detect `.cursor/mcp.json` automatically.
+
+2. **Authenticate** — Cursor will prompt you to log in. This opens a browser window where you sign in to your Supabase account and grant the MCP access to your organization.
+
+   > [!NOTE]
+   > No personal access token (PAT) is needed — authentication happens via browser login.
+
+3. **Verify the connection** — In Cursor, go to **Settings → Cursor Settings → Tools & MCP**. You should see `supabase` listed with a green status indicator.
+
+   If it shows as disconnected, click the refresh button or restart Cursor.
+
+4. **Test it** — Ask the agent something like _"What tables are in my database? Use MCP tools."_ If it returns your tables, you're good to go.
+
+#### Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| MCP shows "client closed" or keeps disconnecting | Restart Cursor. On Windows, also check that your firewall/antivirus isn't blocking outbound HTTPS |
+| Auth popup doesn't appear | Open Cursor's command palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) → "MCP: Sign in" or restart Cursor |
+| Wrong organization/project | Re-authenticate — the browser login lets you pick which org to grant access to |
+| Need to scope to a specific project | Add `?project_ref=your-project-ref` to the URL in `.cursor/mcp.json` |
+
+> Want to customise the setup — scope to a specific project, disable write access, or use a PAT for CI? See the [Supabase MCP docs](https://supabase.com/docs/guides/getting-started/mcp).
 
 ---
 
