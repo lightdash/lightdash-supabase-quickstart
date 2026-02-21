@@ -2,26 +2,26 @@
 $ErrorActionPreference = 'Stop'
 
 # Sets the warehouse connection credentials on an existing Lightdash project
-# via the API — no UI required.
+# via the API -- no UI required.
 #
 # Prerequisites:
 #   - lightdash login has been run (or LIGHTDASH_API_KEY is set)
 #   - lightdash deploy --create has been run (project exists)
 #   - .env exists with DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME, DB_SSL_MODE
 
-function Write-Info    { param([string]$Msg) Write-Host "▶ $Msg" -ForegroundColor Cyan }
-function Write-Success { param([string]$Msg) Write-Host "✓ $Msg" -ForegroundColor Green }
-function Write-Warn    { param([string]$Msg) Write-Host "⚠ $Msg" -ForegroundColor Yellow }
-function Write-Die     { param([string]$Msg) Write-Host "✗ $Msg" -ForegroundColor Red; exit 1 }
+function Write-Info    { param([string]$Msg) Write-Host "[>] $Msg" -ForegroundColor Cyan }
+function Write-Success { param([string]$Msg) Write-Host "[+] $Msg" -ForegroundColor Green }
+function Write-Warn    { param([string]$Msg) Write-Host "[!] $Msg" -ForegroundColor Yellow }
+function Write-Die     { param([string]$Msg) Write-Host "[x] $Msg" -ForegroundColor Red; exit 1 }
 
 $LIGHTDASH_URL = "https://app.lightdash.cloud"
 
 Write-Host ""
 Write-Host "Set Lightdash Warehouse Connection" -ForegroundColor White
-Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+Write-Host "========================================="
 Write-Host ""
 
-# ── load .env ─────────────────────────────────────────────────────────────────
+# -- load .env -----------------------------------------------------------------
 if (Test-Path ".env") {
     $envVars = @{}
     Get-Content ".env" | ForEach-Object {
@@ -49,7 +49,7 @@ if ([string]::IsNullOrWhiteSpace($SSL_MODE)) { $SSL_MODE = "no-verify" }
 
 Write-Host ""
 
-# ── project uuid ──────────────────────────────────────────────────────────────
+# -- project uuid --------------------------------------------------------------
 Write-Info "Reading active Lightdash project..."
 
 $PROJECT_UUID = $env:LIGHTDASH_PROJECT
@@ -74,14 +74,14 @@ if ([string]::IsNullOrWhiteSpace($PROJECT_UUID)) {
 Write-Success "Project UUID: $PROJECT_UUID"
 Write-Host ""
 
-# ── auth token ────────────────────────────────────────────────────────────────
+# -- auth token ----------------------------------------------------------------
 Write-Info "Looking for Lightdash auth token..."
 
 $LIGHTDASH_TOKEN = $env:LIGHTDASH_API_KEY
 
 # Try config.yaml (written by lightdash login)
 if ([string]::IsNullOrWhiteSpace($LIGHTDASH_TOKEN)) {
-    $cliCfg = Join-Path $HOME ".config/lightdash/config.yaml"
+    $cliCfg = Join-Path $HOME ".config\lightdash\config.yaml"
     if (Test-Path $cliCfg) {
         $yamlContent = Get-Content $cliCfg -Raw
         if ($yamlContent -match '(?m)^\s*apiKey:\s*"?([^"\s]+)"?') {
@@ -94,8 +94,8 @@ if ([string]::IsNullOrWhiteSpace($LIGHTDASH_TOKEN)) {
 # Fallback: JSON config locations (older CLI versions)
 if ([string]::IsNullOrWhiteSpace($LIGHTDASH_TOKEN)) {
     $configPaths = @(
-        (Join-Path $HOME ".config/lightdash-cli/config.json"),
-        (Join-Path $env:APPDATA "lightdash-cli/config.json")
+        (Join-Path $HOME ".config\lightdash-cli\config.json"),
+        (Join-Path $env:APPDATA "lightdash-cli\config.json")
     )
     foreach ($cfg in $configPaths) {
         if (Test-Path $cfg) {
@@ -122,7 +122,7 @@ if ([string]::IsNullOrWhiteSpace($LIGHTDASH_TOKEN)) {
 
 Write-Host ""
 
-# ── api call ──────────────────────────────────────────────────────────────────
+# -- api call ------------------------------------------------------------------
 Write-Info "Setting warehouse credentials on project $PROJECT_UUID..."
 Write-Host "  Host:    ${DB_HOST}:${DB_PORT}"
 Write-Host "  DB:      $DB_NAME"
@@ -156,10 +156,10 @@ try {
         -Body $body
 
     if ($response.status -eq "ok") {
-        Write-Success "Done! Warehouse credentials set — no UI step needed."
+        Write-Success "Done! Warehouse credentials set - no UI step needed."
         Write-Host ""
         Write-Host "  Run a query in Lightdash to verify the connection:"
-        Write-Host "  → $LIGHTDASH_URL/projects/$PROJECT_UUID/tables"
+        Write-Host "  $LIGHTDASH_URL/projects/$PROJECT_UUID/tables"
     } else {
         throw "Unexpected response status: $($response.status)"
     }
@@ -178,20 +178,20 @@ try {
     }
     Write-Host ""
     Write-Host "  Common causes:"
-    Write-Host "    401 — token is wrong or expired (regenerate at /settings/personal-access-tokens)"
-    Write-Host "    403 — token doesn't have project admin permissions"
-    Write-Host "    404 — project UUID is wrong"
+    Write-Host "    401 - token is wrong or expired (regenerate at /settings/personal-access-tokens)"
+    Write-Host "    403 - token doesn't have project admin permissions"
+    Write-Host "    404 - project UUID is wrong"
     Write-Host ""
     Write-Host "  Set credentials manually instead:"
-    Write-Host "  → $LIGHTDASH_URL → gear → Project Settings → warehouse connection form"
+    Write-Host "  $LIGHTDASH_URL > gear > Project Settings > warehouse connection form"
     Write-Host "    Host:     $DB_HOST"
     Write-Host "    Port:     $DB_PORT"
     Write-Host "    Database: $DB_NAME"
     Write-Host "    User:     $DB_USER"
     Write-Host "    Password: (from .env)"
-    Write-Host "    → Advanced → SSL mode: $SSL_MODE"
+    Write-Host "    Advanced > SSL mode: $SSL_MODE"
     Write-Host ""
-    Write-Host "  Note: use the Session/Transaction Pooler host from Supabase → Connect"
+    Write-Host "  Note: use the Session/Transaction Pooler host from Supabase > Connect"
     Write-Host "  NOT the Direct connection host (db.xxxx.supabase.co)"
     exit 1
 }
